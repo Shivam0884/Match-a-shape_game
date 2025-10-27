@@ -40,7 +40,7 @@ export default function Game() {
         alt="Profile"
         style={{
           position: "absolute",
-          top: "20px",
+          top: "10px",
           left: "60px",
           width: "60px",
           height: "60px",
@@ -54,7 +54,7 @@ export default function Game() {
         <h3
           style={{
             position: "absolute",
-            top: "90px",
+            top: "70px",
             left: "20px",
             color: "#000",
             fontFamily: "'Poppins', sans-serif",
@@ -71,8 +71,9 @@ export default function Game() {
           onClick={handleLogout}
           style={{
             position: "absolute",
-            top: "50px",
+            top: "30px",
             right: "50px",
+            zIndex: 9999,
             display: "flex",
             alignItems: "center",
             gap: "10px",

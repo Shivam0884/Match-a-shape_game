@@ -11,38 +11,52 @@ export default function ShapeGame({ userName }) {
   const [basketX, setBasketX] = useState(45);
   const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [fallingShapes, setFallingShapes] = useState([]);
 
   const basketRef = useRef();
   const containerRef = useRef();
-  const [fallingShapes, setFallingShapes] = useState([
-    { id: 1, shape: getRandomShape(), x: Math.random() * 70 + 15 },
-  ]);
-  const nextShapeId = useRef(2);
+  const nextShapeId = useRef(1);
 
-  // Basket movement
+  useEffect(() => {
+    // Start first shape
+    spawnNextShape();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** 🧺 Move Basket with Arrow keys */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") setBasketX((x) => Math.max(x - 5, 5));
-      if (e.key === "ArrowRight") setBasketX((x) => Math.min(x + 5, 85));
+      if (e.key === "ArrowRight") setBasketX((x) => Math.min(x + 5, 95));
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  /** 🖱️ Basket moves with mouse */
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
-    setBasketX(Math.min(Math.max(x, 5), 85));
+    setBasketX(Math.min(Math.max(x, 5), 95));
   };
 
+  /** 🎮 Game Over and Win logic */
   const handleGameOver = () => {
-    setGameOver(true);
-    API.post("/game/update-score", { level }).catch((err) =>
-      console.error(err)
-    );
+    if (!gameOver && !won) {
+      setGameOver(true);
+      API.post("/game/update-score", { level }).catch(console.error);
+    }
+  };
+  const handleWin = () => {
+    if (!won) {
+      setWon(true);
+      API.post("/game/update-score", { level: 5 }).catch(console.error);
+    }
   };
 
+  /** 🎨 Helper to render target shape */
   const renderShape = (shape, size = 80) => (
     <img
       src={shape.image}
@@ -51,16 +65,51 @@ export default function ShapeGame({ userName }) {
     />
   );
 
-  // Add new shape
-  const addShape = () => {
-    setFallingShapes((prev) => [
-      ...prev,
-      {
-        id: nextShapeId.current++,
-        shape: getRandomShape(),
-        x: Math.random() * 70 + 15,
-      },
-    ]);
+  /** 🌈 Spawn a single new falling shape */
+  const spawnNextShape = (delay = 0) => {
+    if (gameOver || won) return;
+    setTimeout(() => {
+      if (gameOver || won) return;
+      setFallingShapes((prev) => {
+        if (prev.length >= 2) return prev; // keep only 2 on screen max for ease
+        const newShape = {
+          id: nextShapeId.current++,
+          shape: getRandomShape(),
+          x: Math.random() * 70 + 15,
+          startY: -Math.random() * 100 - 100,
+          delayStart: Math.random() * 0.3,
+        };
+        return [...prev, newShape];
+      });
+    }, delay);
+  };
+
+  /** Remove shape from state */
+  const removeShape = (id) => {
+    setFallingShapes((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  /** ✅ When correct shape caught */
+  const handleCorrectCatch = (id) => {
+    removeShape(id);
+    if (level >= 5) handleWin();
+    else {
+      setLevel((l) => l + 1);
+      setTargetShape(getRandomShape());
+      setTimeout(() => spawnNextShape(800), 400);
+    }
+  };
+
+  /** ❌ Wrong shape caught */
+  const handleWrongCatch = (id) => {
+    removeShape(id);
+    handleGameOver();
+  };
+
+  /** ❌ Missed target shape */
+  const handleMissedTarget = (id) => {
+    removeShape(id);
+    handleGameOver();
   };
 
   return (
@@ -74,55 +123,91 @@ export default function ShapeGame({ userName }) {
         position: "relative",
       }}
     >
-      {/* Left Panel */}
-      <div style={{ width: "30%", textAlign: "center" }}>
-        <h2>Catch This Shape:</h2>
-        {renderShape(targetShape)}
-        <h4>Level: {level} / 5</h4>
-        <h4>Player: {userName}</h4>
+      {/* --- Left Info Panel --- */}
+      <div
+        style={{
+          width: "30%",
+          textAlign: "center",
+          background: "linear-gradient(135deg, #fef9e7 0%, #f9e79f 100%)",
+          borderRadius: "20px",
+          padding: "20px",
+          boxShadow: "0 6px 20px rgba(0,0,0,0.2)",
+          border: "2px solid #91f45fff",
+          color: "#4a3f0b",
+          fontFamily: "'Poppins', sans-serif",
+        }}
+      >
+        <h2>🎯 Catch This Shape</h2>
+        <div
+          style={{
+            background: "white",
+            borderRadius: "12px",
+            padding: "15px",
+            display: "inline-block",
+            boxShadow: "inset 0 0 10px rgba(0,0,0,0.15)",
+          }}
+        >
+          <div style={{ transform: "scale(1.5)" }}>
+            {renderShape(targetShape)}
+          </div>
+        </div>
+
+        <h4 style={{ marginTop: "20px" }}>
+          ⭐ Level: <b>{level} / 5</b>
+        </h4>
+        <h4>
+          👤 Player: <b>{userName}</b>
+        </h4>
+
         <div style={{ marginTop: "20px" }}>
           <button
             onClick={() => setPaused(!paused)}
-            style={{ marginRight: 10 }}
+            className="btn btn-warning me-2 shadow-sm"
           >
-            {paused ? "Resume" : "Pause"}
+            {paused ? "▶ Resume" : "⏸ Pause"}
           </button>
-          <button onClick={() => window.location.reload()}>Restart</button>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn btn-danger shadow-sm"
+          >
+            🔄 Restart
+          </button>
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* --- Game Area --- */}
       <div
         ref={containerRef}
         style={{
-          width: "50%",
-          height: "500px",
+          width: "65%",
+          height: "550px",
           border: "3px dashed gray",
           borderRadius: "20px",
           position: "relative",
           overflow: "hidden",
-          backgroundColor: "#d0f0c0",
+          backgroundColor: "#bceaa5ff",
         }}
         onMouseMove={handleMouseMove}
       >
         {fallingShapes.map((s) => (
           <FallingShape
             key={s.id}
-            shape={s}
+            instance={s}
             containerRef={containerRef}
             basketRef={basketRef}
             targetShape={targetShape}
-            setTargetShape={setTargetShape}
             level={level}
-            setLevel={setLevel}
             paused={paused}
-            gameOver={gameOver}
-            handleGameOver={handleGameOver}
-            addShape={addShape}
+            gameOver={gameOver || won}
+            spawnNextShape={spawnNextShape}
+            onCorrectCatch={() => handleCorrectCatch(s.id)}
+            onWrongCatch={() => handleWrongCatch(s.id)}
+            onMissedTarget={() => handleMissedTarget(s.id)}
+            removeShape={() => removeShape(s.id)}
           />
         ))}
 
-        {/* Basket */}
+        {/* 🧺 Basket */}
         <div
           ref={basketRef}
           style={{
@@ -130,25 +215,24 @@ export default function ShapeGame({ userName }) {
             bottom: "10px",
             left: `${basketX}%`,
             transform: "translateX(-50%)",
-            width: "160px",
-            height: "80px",
-            backgroundColor: "#a0522d",
-            borderRadius: "20px 20px 50px 50px",
-            border: "3px solid #8b4513",
+            width: "180px",
+            height: "90px",
+            background: "linear-gradient(135deg, #c28b55 0%, #8b5a2b 100%)",
+            borderRadius: "25px 25px 60px 60px",
+            boxShadow:
+              "inset 0 4px 8px rgba(255, 255, 255, 0.3), 0 6px 15px rgba(0,0,0,0.4)",
+            borderTop: "6px solid #d2a679",
+            borderBottom: "6px solid #5a3310",
             textAlign: "center",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: "32px",
-            lineHeight: "80px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-            cursor: "pointer",
+            fontSize: "40px",
           }}
         >
           🧺
         </div>
       </div>
 
-      {gameOver && (
+      {/* --- Popup --- */}
+      {(gameOver || won) && (
         <div
           style={{
             position: "absolute",
@@ -162,8 +246,8 @@ export default function ShapeGame({ userName }) {
             textAlign: "center",
           }}
         >
-          <h2>🎉 Game Over!</h2>
-          <h3>Reached Level: {level}</h3>
+          <h2>{won ? "🎉 Congratulations!" : "💀 Game Over!"}</h2>
+          <h3>{won ? "You Won the Game!" : `Reached Level: ${level}`}</h3>
           <button onClick={() => window.location.reload()}>Play Again</button>
         </div>
       )}
@@ -171,83 +255,92 @@ export default function ShapeGame({ userName }) {
   );
 }
 
-// FallingShape component
+/* --- Falling Shape Component --- */
 function FallingShape({
-  shape,
+  instance,
   containerRef,
   basketRef,
   targetShape,
-  setTargetShape,
   level,
-  setLevel,
   paused,
   gameOver,
-  handleGameOver,
-  addShape,
+  spawnNextShape,
+  onCorrectCatch,
+  onWrongCatch,
+  onMissedTarget,
+  removeShape,
 }) {
   const controls = useAnimation();
   const shapeRef = useRef();
+  const caughtRef = useRef(false);
 
   useEffect(() => {
     if (!paused && !gameOver) {
-      const duration = Math.max(1, 5 - level * 0.6);
-      controls.start({ y: 400, transition: { duration, ease: "linear" } });
-    }
-  }, [paused, gameOver, level, controls]);
+      const baseSpeed = 6.3 - level * 0.45; // slower for kids, speeds up per level
+      const duration = Math.max(3, baseSpeed + Math.random() * 0.8);
+      controls.start({
+        y: 460,
+        transition: { duration, ease: "easeInOut", delay: instance.delayStart },
+      });
+    } else controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paused, gameOver, level]);
 
-  const onUpdate = (latest) => {
-    const containerHeight = containerRef.current.offsetHeight;
-    if (latest.y / containerHeight >= 0.3 && !shape.spawnedNext) {
-      addShape();
-      shape.spawnedNext = true;
-    }
-  };
+  const onComplete = () => {
+    if (caughtRef.current) return removeShape();
 
-  const onComplete = async () => {
-    const basketRect = basketRef.current.getBoundingClientRect();
-    const shapeRect = shapeRef.current.getBoundingClientRect();
+    const basketRect = basketRef.current?.getBoundingClientRect();
+    const shapeRect = shapeRef.current?.getBoundingClientRect();
+
+    if (!basketRect || !shapeRect) {
+      if (instance.shape.name === targetShape.name) onMissedTarget();
+      else {
+        controls.start({ opacity: 0, transition: { duration: 0.4 } });
+        spawnNextShape(1000);
+        setTimeout(() => removeShape(), 400);
+      }
+      return;
+    }
 
     const diffX = Math.abs(
       shapeRect.x + shapeRect.width / 2 - (basketRect.x + basketRect.width / 2)
     );
 
     if (diffX <= 60) {
-      if (shape.shape.name === targetShape.name) {
-        setLevel((l) => Math.min(l + 1, 5));
-        setTargetShape(getRandomShape());
-      } else {
-        handleGameOver();
+      caughtRef.current = true;
+      if (instance.shape.name === targetShape.name) onCorrectCatch();
+      else onWrongCatch();
+    } else {
+      if (instance.shape.name === targetShape.name) onMissedTarget();
+      else {
+        controls.start({ opacity: 0, transition: { duration: 0.5 } });
+        spawnNextShape(1000);
+        setTimeout(() => removeShape(), 400);
       }
-    }
-
-    if (!gameOver && !paused) {
-      // reset animation
-      controls.set({ y: 0 });
-      controls.start({
-        y: 400,
-        transition: { duration: Math.max(1, 5 - level * 0.6), ease: "linear" },
-      });
     }
   };
 
   return (
     <motion.div
       ref={shapeRef}
-      id={`falling-shape-${shape.id}`}
       animate={controls}
-      onUpdate={onUpdate}
       onAnimationComplete={onComplete}
+      initial={{ y: instance.startY }}
       style={{
         position: "absolute",
-        top: 0,
-        left: `${shape.x}%`,
+        left: `${instance.x}%`,
         transform: "translateX(-50%)",
+        pointerEvents: "none",
       }}
     >
       <img
-        src={shape.shape.image}
-        alt={shape.shape.name}
-        style={{ width: 80, height: 80 }}
+        src={instance.shape.image}
+        alt={instance.shape.name}
+        style={{
+          width: 80 + level * 5,
+          height: 80 + level * 5,
+          userSelect: "none",
+        }}
       />
     </motion.div>
   );
