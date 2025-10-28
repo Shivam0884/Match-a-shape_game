@@ -49,7 +49,7 @@ export default function Home() {
       >
         Welcome to <br />
         <span style={{ color: "#000", textDecoration: "underline" }}>
-          Word Catcher
+          Catch ‘n Match
         </span>
       </h1>
       {/* Start Button */}

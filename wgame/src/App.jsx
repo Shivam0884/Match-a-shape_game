@@ -15,7 +15,7 @@ function App() {
       {/* Page content changes based on route */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/api/game" element={<Game />} />
+        <Route path="/game" element={<Game />} />
         <Route path="/about" element={<About />} />
         <Route path="/user" element={<User />} />
         <Route path="/signup" element={<Signup />} />

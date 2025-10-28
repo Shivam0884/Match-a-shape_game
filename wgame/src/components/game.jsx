@@ -37,6 +37,7 @@ export default function Game() {
       {/* Profile */}
       <img
         src={profile}
+        onClick={() => navigate("/")}
         alt="Profile"
         style={{
           position: "absolute",
@@ -69,6 +70,12 @@ export default function Game() {
       {isLogIn && (
         <div
           onClick={handleLogout}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "rgba(255,0,0,0.7)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.5)")
+          }
           style={{
             position: "absolute",
             top: "30px",

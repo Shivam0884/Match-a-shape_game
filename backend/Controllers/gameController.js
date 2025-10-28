@@ -21,4 +21,4 @@ const updateScore = async (req, res) => {
   }
 };
 
-module.exports = { updateScore }; // ✅ Named export
+module.exports = { updateScore }; //  Named export

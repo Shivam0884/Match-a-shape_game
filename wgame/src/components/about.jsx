@@ -19,7 +19,7 @@ export default function Game() {
 
   const handleClick = () => {
     if (isLogIn) {
-      navigate("/api/game");
+      navigate("/game");
     } else {
       alert("Please login to start the game!");
       navigate("/login");

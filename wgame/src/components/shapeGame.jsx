@@ -20,29 +20,39 @@ export default function ShapeGame({ userName }) {
   const nextShapeId = useRef(1);
 
   useEffect(() => {
-    // Start first shape
-    spawnNextShape();
+    //  Spawn multiple shapes based on level
+    const numShapes = Math.min(2 + Math.floor(level / 2), 4);
+    for (let i = 0; i < numShapes; i++) {
+      spawnNextShape(i * 600); // slight delay between spawns
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [level]);
 
-  /** 🧺 Move Basket with Arrow keys */
+  /**  Move Basket with Arrow keys */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") setBasketX((x) => Math.max(x - 5, 5));
       if (e.key === "ArrowRight") setBasketX((x) => Math.min(x + 5, 95));
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown); //Remove key listener when leaving page
   }, []);
 
-  /** 🖱️ Basket moves with mouse */
+  /** Basket moves with mouse */
   const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect(); //It returns an object like this:
+    //{
+    //   left: 100,   // distance from the left edge of the screen
+    //   top: 200,    // distance from the top edge
+    //   width: 800,  // width of the game area in pixels
+    //   height: 500  // height of the game area
+    // }
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     setBasketX(Math.min(Math.max(x, 5), 95));
   };
 
-  /** 🎮 Game Over and Win logic */
+  /** Game Over and Win logic */
   const handleGameOver = () => {
     if (!gameOver && !won) {
       setGameOver(true);
@@ -56,7 +66,7 @@ export default function ShapeGame({ userName }) {
     }
   };
 
-  /** 🎨 Helper to render target shape */
+  /** Helper to render target shape */
   const renderShape = (shape, size = 80) => (
     <img
       src={shape.image}
@@ -65,20 +75,39 @@ export default function ShapeGame({ userName }) {
     />
   );
 
-  /** 🌈 Spawn a single new falling shape */
   const spawnNextShape = (delay = 0) => {
     if (gameOver || won) return;
     setTimeout(() => {
       if (gameOver || won) return;
       setFallingShapes((prev) => {
-        if (prev.length >= 2) return prev; // keep only 2 on screen max for ease
+        //  Dynamic limit — increases as level increases
+        const maxShapes = Math.min(2 + Math.floor(level / 2), 4);
+        // level 1–2 => 2, level 3–4 => 3, level 5+ => 4
+        if (prev.length >= maxShapes) return prev;
+
+        //  Generate a new X position that doesn't overlap
+        let newX;
+        let safe = false;
+        let attempts = 0;
+        while (!safe && attempts < 10) {
+          newX = Math.random() * 70 + 15; // random X between 15–85%
+          safe = prev.every((s) => Math.abs(s.x - newX) > 18);
+          attempts++;
+        }
+
+        //  Add slight stagger and jitter so they don't fall exactly together
+        const baseStagger = 400;
+        const jitter = Math.random() * 150;
+        const delayStart = (prev.length * baseStagger + jitter) / 1000;
+
         const newShape = {
           id: nextShapeId.current++,
           shape: getRandomShape(),
-          x: Math.random() * 70 + 15,
-          startY: -Math.random() * 100 - 100,
-          delayStart: Math.random() * 0.3,
+          x: newX,
+          startY: -100 - Math.random() * 50,
+          delayStart, // seconds for framer-motion
         };
+
         return [...prev, newShape];
       });
     }, delay);
@@ -86,27 +115,27 @@ export default function ShapeGame({ userName }) {
 
   /** Remove shape from state */
   const removeShape = (id) => {
-    setFallingShapes((prev) => prev.filter((s) => s.id !== id));
+    setFallingShapes((prev) => prev.filter((s) => s.id !== id)); //Keep every shape except the one whose id equals the given id
   };
 
-  /** ✅ When correct shape caught */
+  /**  When correct shape caught */
   const handleCorrectCatch = (id) => {
     removeShape(id);
     if (level >= 5) handleWin();
     else {
       setLevel((l) => l + 1);
       setTargetShape(getRandomShape());
-      setTimeout(() => spawnNextShape(800), 400);
+      setTimeout(() => spawnNextShape(600), 400);
     }
   };
 
-  /** ❌ Wrong shape caught */
+  /**  Wrong shape caught */
   const handleWrongCatch = (id) => {
     removeShape(id);
     handleGameOver();
   };
 
-  /** ❌ Missed target shape */
+  /**  Missed target shape */
   const handleMissedTarget = (id) => {
     removeShape(id);
     handleGameOver();
@@ -207,7 +236,7 @@ export default function ShapeGame({ userName }) {
           />
         ))}
 
-        {/* 🧺 Basket */}
+        {/*  Basket */}
         <div
           ref={basketRef}
           style={{
@@ -276,13 +305,27 @@ function FallingShape({
 
   useEffect(() => {
     if (!paused && !gameOver) {
-      const baseSpeed = 6.3 - level * 0.45; // slower for kids, speeds up per level
-      const duration = Math.max(3, baseSpeed + Math.random() * 0.8);
+      // constant fall duration for all shapes (same vertical speed)
+      const baseDuration = Math.max(1.3, 4 - level * 0.8); // adjust to taste; same for all shapes this level
+      // use linear easing so vertical speed is uniform over time
       controls.start({
         y: 460,
-        transition: { duration, ease: "easeInOut", delay: instance.delayStart },
+        transition: {
+          duration: baseDuration,
+          ease: "linear",
+          delay: instance.delayStart || 0, // seconds
+        },
       });
-    } else controls.stop();
+
+      // We do NOT randomize per-shape speed here: all shapes use baseDuration.
+      // Cleanup nothing special here — framer-motion controls handles animation lifecycle.
+      return () => {
+        // stop animation when component unmounts or dependencies change
+        controls.stop();
+      };
+    } else {
+      controls.stop();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paused, gameOver, level]);
 
@@ -290,7 +333,7 @@ function FallingShape({
     if (caughtRef.current) return removeShape();
 
     const basketRect = basketRef.current?.getBoundingClientRect();
-    const shapeRect = shapeRef.current?.getBoundingClientRect();
+    const shapeRect = shapeRef.current?.getBoundingClientRect(); //.getBoundingClientRect() gives you the position and size of that element in pixels, relative to the screen.
 
     if (!basketRect || !shapeRect) {
       if (instance.shape.name === targetShape.name) onMissedTarget();
