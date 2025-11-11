@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bgImage from "../assets/Group 22.png";
+import monkey from "../assets/monkey.png";
+import bird from "../assets/bird.png";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [isLogIn, setIsLogIn] = useState(false);
@@ -34,9 +37,85 @@ export default function Home() {
         color: "#000",
         textAlign: "center",
         position: "relative",
+        overflow: "hidden",
       }}
     >
-      <h1
+      <motion.img
+        src={monkey}
+        alt="monkey"
+        initial={{ y: -400, rotate: -20, opacity: 0 }}
+        animate={{
+          y: 0,
+          rotate: [0, -10, 10, -10, 10, 0],
+          opacity: 1,
+        }}
+        transition={{
+          y: {
+            duration: 2,
+            ease: "easeOut",
+            type: "spring",
+            stiffness: 70,
+            damping: 10,
+          },
+          rotate: {
+            delay: 1, // start swinging after falling
+            duration: 3,
+            ease: "easeInOut",
+            repeat: Infinity,
+            repeatType: "mirror",
+          },
+        }}
+        style={{
+          position: "absolute",
+          top: "0",
+          left: "4%",
+          width: "160px",
+          height: "auto",
+          zIndex: 5,
+          userSelect: "none",
+          transformOrigin: "top center",
+        }}
+      />
+
+      <motion.img
+        src={bird}
+        alt="bird"
+        initial={{ x: 400, y: -50, opacity: 0, scale: 0.8 }}
+        animate={{
+          x: 0,
+          y: 0,
+          opacity: 1,
+          scale: 1,
+        }}
+        transition={{
+          duration: 4,
+          delay: 1,
+          ease: [0.17, 0.67, 0.83, 0.67],
+          type: "spring",
+          stiffness: 60,
+          damping: 12,
+        }}
+        style={{
+          position: "absolute",
+          top: "8%",
+          right: "0%",
+          width: "280px",
+          height: "auto",
+          zIndex: 6,
+          userSelect: "none",
+        }}
+      />
+
+      <motion.h1
+        initial={{ opacity: 0, y: 80, scale: 0.8 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          duration: 2,
+          ease: [0.25, 0.1, 0.25, 1],
+          type: "spring",
+          stiffness: 60,
+          damping: 15,
+        }}
         style={{
           fontSize: "clamp(2rem, 7vw, 5rem)",
           fontFamily: "'Luckiest Guy', cursive",
@@ -44,13 +123,43 @@ export default function Home() {
           textShadow: "3px 3px #fff",
           marginBottom: "2rem",
           letterSpacing: "2px",
+          textAlign: "center",
+          zIndex: 10,
         }}
       >
-        Welcome to <br />
-        <span style={{ color: "#000", textDecoration: "underline" }}>
+        <motion.span
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 2.5,
+            delay: 0.5,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          style={{ display: "inline-block" }}
+        >
+          Welcome to
+        </motion.span>
+        <br />
+        <motion.span
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 4,
+            delay: 1.2,
+            type: "spring",
+            stiffness: 70,
+            damping: 12,
+          }}
+          style={{
+            color: "#000",
+            textDecoration: "underline",
+            display: "inline-block",
+          }}
+        >
           Catch ‘n Match
-        </span>
-      </h1>
+        </motion.span>
+      </motion.h1>
+
       <button
         onClick={handleStartGame}
         style={{
@@ -64,6 +173,7 @@ export default function Home() {
           cursor: "pointer",
           boxShadow: "0px 6px 15px rgba(0,0,0,0.3)",
           transition: "all 0.3s ease",
+          zIndex: 10,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = "scale(1.05)";
@@ -78,8 +188,9 @@ export default function Home() {
       >
         Let’s Get Started
       </button>
+
       {isLogIn ? (
-        <p className="mt-3 fs-7 " style={{ fontWeight: "2px" }}>
+        <p className="mt-3 fs-7 " style={{ fontWeight: "2px", zIndex: 10 }}>
           Now you are ready to play game!
         </p>
       ) : (
@@ -88,6 +199,7 @@ export default function Home() {
             marginTop: "20px",
             fontWeight: "600",
             color: "#333",
+            zIndex: 10,
           }}
         >
           Already have an account?{" "}
