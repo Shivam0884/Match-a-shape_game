@@ -102,7 +102,7 @@ export default function Dashboard() {
           boxShadow: "0 6px 15px rgba(0,0,0,0.4)",
         }}
       >
-        Match’n Catch
+        Catch'n Match
       </h1>
 
       <div style={{ flexGrow: 1 }}></div>
