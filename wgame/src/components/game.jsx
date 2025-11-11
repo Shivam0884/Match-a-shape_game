@@ -34,7 +34,7 @@ export default function Game() {
         position: "relative",
       }}
     >
-      {/* Profile */}
+      {/* Profile
       <img
         src={profile}
         onClick={() => navigate("/")}
@@ -65,7 +65,7 @@ export default function Game() {
         >
           {userName}
         </h3>
-      )}
+      )} */}
 
       {isLogIn && (
         <div

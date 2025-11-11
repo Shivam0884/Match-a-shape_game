@@ -19,7 +19,7 @@ export default function Game() {
 
   const handleClick = () => {
     if (isLogIn) {
-      navigate("/level1");
+      navigate("/game");
     } else {
       alert("Please login to start the game!");
       navigate("/login");
@@ -116,7 +116,7 @@ export default function Game() {
           left: "50%",
           transform: "translate(-50%, -50%)",
 
-          width: "600px",
+          width: "650px",
           height: "650px",
           zIndex: 5,
         }}
@@ -125,39 +125,39 @@ export default function Game() {
           className="text-danger mb-3 fw-bold"
           style={{ fontFamily: "'Comic Sans MS', cursive", fontSize: "2.2rem" }}
         >
-          🎮 How to Play Level 1! 🎯
+          🎮 How to Play Level 2! 🎯
         </h2>
 
         {/* ✅ Updated Instructions for StaticShapeGame */}
         <div className="mb-3 text-start" style={{ paddingLeft: "30px" }}>
-          <p className="mb-2 fs-5">
-            1️⃣ You’ll see a <strong>🎯 Target Shape</strong> at the top-left
-            corner of your screen.
-          </p>
-          <p className="mb-2 fs-5">
-            2️⃣ Many shapes will appear randomly on the screen — your goal is to{" "}
-            <strong>find and click the exact matching shape</strong> as shown in
-            the target box.
-          </p>
-          <p className="mb-2 fs-5">
-            3️⃣ You have only <strong>5 seconds ⏱️</strong> to click the correct
-            shape for each round.
-          </p>
-          <p className="mb-2 fs-5">
-            4️⃣ If you select the <strong>wrong shape</strong> or run out of
-            time, you lose the game. ❌
+          <p className="mb-2 fs-4">
+            1️⃣ A <strong>🎯 Target Shape</strong> will be shown at the top-left
+            corner. You have to catch this shape using your basket 🧺.
           </p>
 
-          <p className="mb-2 fs-5">
-            5️⃣When you successfully identify all shapes, you’ll see a{" "}
-            <strong>🎉 Congratulations popup</strong>.
+          <p className="mb-2 fs-4">
+            2️⃣ Shapes will <strong>fall from the top</strong> of the screen.
+            Move your basket left or right with the <strong>arrow keys</strong>{" "}
+            or your
+            <strong> mouse</strong>.
+          </p>
+
+          <p className="mb-2 fs-4">
+            3️⃣ Catch only the <strong>target shape</strong>. If you catch the
+            wrong one, the game will end ❌.
+          </p>
+
+          <p className="mb-2 fs-4">
+            4️⃣ Each correct catch increases your{" "}
+            <strong>level and speed</strong>. Finish all{" "}
+            <strong>5 levels</strong> to win the game! 🏆
+          </p>
+
+          <p className="mb-2 fs-4">
+            5️⃣ Use <strong>Pause ⏸️</strong> or <strong>Restart 🔄</strong>{" "}
+            anytime to control your game.
           </p>
         </div>
-
-        <p className="text-success fs-5 fw-bold">
-          🎯 Goal: Match all target shapes correctly within the time limit to
-          win the game! 🏆
-        </p>
 
         <button
           className="fw-bold"

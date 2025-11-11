@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import bgImage from "../assets/grp.png"; // keep your jungle background
+import bgImage from "../assets/grp.png";
 
 export default function Login() {
   const [loginInfo, setLoginInfo] = useState({ email: "", password: "" });

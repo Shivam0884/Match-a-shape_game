@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import bgImage from "../assets/Group 22.png"; // ✅ Replace with your image path (use your uploaded image)
+import bgImage from "../assets/Group 22.png";
 
 export default function Home() {
   const [isLogIn, setIsLogIn] = useState(false);
@@ -13,7 +13,7 @@ export default function Home() {
 
   const handleStartGame = () => {
     if (isLogIn) {
-      navigate("/about");
+      navigate("/dashboard");
     } else {
       alert("Please login to start the game!");
       navigate("/login");
@@ -36,7 +36,6 @@ export default function Home() {
         position: "relative",
       }}
     >
-      {/* Title */}
       <h1
         style={{
           fontSize: "clamp(2rem, 7vw, 5rem)",
@@ -52,7 +51,6 @@ export default function Home() {
           Catch ‘n Match
         </span>
       </h1>
-      {/* Start Button */}
       <button
         onClick={handleStartGame}
         style={{
@@ -80,7 +78,6 @@ export default function Home() {
       >
         Let’s Get Started
       </button>
-      {/* Sign In Text */}
       {isLogIn ? (
         <p className="mt-3 fs-7 " style={{ fontWeight: "2px" }}>
           Now you are ready to play game!

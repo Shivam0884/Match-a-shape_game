@@ -1,15 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors");
+const cors = require("cors"); // ✅ only once
 const AuthRouter = require("./Routes/AuthRouter");
-const app = express();
 const gameRoutes = require("./Routes/gameRoutes");
 require("dotenv").config();
 require("./Models/db");
 
+const app = express();
 const PORT = process.env.PORT || 8080;
-const cors = require("cors");
 
+// ✅ configure cors only once
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -18,9 +18,7 @@ app.use(
 );
 
 app.use(bodyParser.json());
-app.use(cors());
 app.use("/auth", AuthRouter);
-
 app.use("/api/game", gameRoutes);
 
 app.listen(PORT, () => {
