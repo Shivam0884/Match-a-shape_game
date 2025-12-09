@@ -15,6 +15,7 @@ export default function ShapeGame({ userName }) {
   const [won, setWon] = useState(false);
   const [paused, setPaused] = useState(false);
   const [fallingShapes, setFallingShapes] = useState([]);
+  const [lives, setLives] = useState(3);
   const basketRef = useRef();
   const containerRef = useRef();
   const nextShapeId = useRef(1);
@@ -110,12 +111,20 @@ export default function ShapeGame({ userName }) {
 
   const handleWrongCatch = (id) => {
     removeShape(id);
-    handleGameOver();
+    setLives((prev) => {
+      const newLives = prev - 1;
+      if (newLives <= 0) handleGameOver();
+      return newLives;
+    });
   };
 
   const handleMissedTarget = (id) => {
     removeShape(id);
-    handleGameOver();
+    setLives((prev) => {
+      const newLives = prev - 1;
+      if (newLives <= 0) handleGameOver();
+      return newLives;
+    });
   };
 
   return (
@@ -179,7 +188,8 @@ export default function ShapeGame({ userName }) {
           </div>
         </div>
 
-        <h4 style={{ margin: "6px 0" }}>⭐ Score {level} / 5</h4>
+        <h4 style={{ margin: "6px 0" }}>⭐ Score {level} / 6</h4>
+        <h4 style={{ margin: "6px 0" }}>❤️ Lives: {lives}</h4>
         <h4 style={{ margin: "6px 0" }}>👤 {userName}</h4>
 
         <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
@@ -312,18 +322,18 @@ function FallingShape({
 
   useEffect(() => {
     if (!paused && !gameOver) {
-      const baseDuration = Math.max(1.3, 4 - level * 0.8);
+      const fixedDuration = 5; // constant speed for all levels
       controls.start({
         y: "90vh",
         transition: {
-          duration: baseDuration,
+          duration: fixedDuration,
           ease: "linear",
           delay: instance.delayStart || 0,
         },
       });
       return () => controls.stop();
     } else controls.stop();
-  }, [paused, gameOver, level, controls, instance.delayStart]);
+  }, [paused, gameOver, controls, instance.delayStart]);
 
   const onComplete = () => {
     if (caughtRef.current) return removeShape();

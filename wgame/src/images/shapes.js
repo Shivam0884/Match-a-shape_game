@@ -1,6 +1,6 @@
 // shapesData.js
 export const shapesData = [
-  { name: "first", image: "/images/shapes/first.png" },
+  // { name: "first", image: "/images/shapes/first.png" },
   { name: "second", image: "/images/shapes/hexagon.png" },
   { name: "third", image: "/images/shapes/third.png" },
   { name: "fifth", image: "/images/shapes/circle1.png" },

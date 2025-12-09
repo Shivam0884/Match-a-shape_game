@@ -81,7 +81,7 @@ export default function StaticShapeGame() {
   useEffect(() => {
     if (gameOver || showCongrats || isPaused) return;
 
-    setTimeLeft(5);
+    setTimeLeft(15);
     clearInterval(timerRef.current);
 
     timerRef.current = setInterval(() => {
@@ -105,6 +105,7 @@ export default function StaticShapeGame() {
 
     if (shapeName === targetShape.name) {
       if (targetIndex === shapesData.length - 1) {
+        clearInterval(timerRef.current); // ⏸ Stop timer when player wins
         setResult("🏆 Congratulations!");
         setShowCongrats(true);
         setGameOver(true);
@@ -112,6 +113,7 @@ export default function StaticShapeGame() {
         setTargetIndex(targetIndex + 1);
       }
     } else {
+      clearInterval(timerRef.current); // ⏸ Stop timer when player loses
       setResult("❌ You Lost! Wrong Shape.");
       setGameOver(true);
     }
